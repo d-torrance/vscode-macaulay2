@@ -78,11 +78,12 @@
 		"test": "npm run compile && node ./node_modules/vscode/bin/test"
 	},
 	"devDependencies": {
-		"typescript": "^5.7.2",
-		"vscode-test": "^1.0.0",
+		"@types/mocha": "^2.2.42",
+		"@types/node": "^10.12.21",
 		"@types/vscode": "^1.96.0",
 		"tslint": "^5.12.1",
-		"@types/node": "^10.12.21",
-		"@types/mocha": "^2.2.42"
+		"typescript": "^5.7.2",
+		"vscode-languageclient": "^9.0.1",
+		"vscode-test": "^1.0.0"
 	}
 }
