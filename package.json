@@ -1,130 +1,130 @@
 {
-	"name": "macaulay2",
-	"displayName": "Macaulay2",
-	"description": "Macaulay2 language support",
-	"version": "0.6.0",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/Macaulay2/vscode-macaulay2"
-	},
-	"publisher": "M2",
-	"engines": {
-		"vscode": "^1.100.0"
-	},
-	"categories": [
-		"Programming Languages"
-	],
-	"activationEvents": [
-		"onLanguage:macaulay2"
-	],
-	"main": "./out/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "macaulay2.startREPL",
-				"title": "Start M2 REPL"
-			},
-			{
-				"command": "macaulay2.sendToREPL",
-				"title": "Send code to Macaulay2 REPL"
-			}
-		],
-		"grammars": [
-			{
-				"language": "macaulay2",
-				"scopeName": "source.macaulay2",
-				"path": "./syntaxes/macaulay2.tmLanguage.json"
-			},
-			{
-				"scopeName": "markdown.macaulay2.codeblock",
-				"path": "./syntaxes/codeblock.json",
-				"injectTo": [
-					"text.html.markdown"
-				],
-				"embeddedLanguages": {
-					"meta.embedded.block.macaulay2": "macaulay2"
-				}
-			}
-		],
-		"languages": [
-			{
-				"id": "macaulay2",
-				"aliases": [
-					"Macaulay2",
-					"macaulay2"
-				],
-				"extensions": [
-					".m2"
-				],
-				"configuration": "./language-configuration.json"
-			}
-		],
-		"configuration": {
-			"title": "Macaulay2",
-			"properties": {
-				"macaulay2.executablePath": {
-					"type": "string",
-					"default": "M2",
-					"description": "Location of Macaulay2 executable",
-					"scope": "application"
-				}
-			}
-		},
-		"keybindings": [
-			{
-				"command": "macaulay2.sendToREPL",
-				"key": "shift+Enter",
-				"when": "editorLangId == macaulay2"
-			},
-			{
-				"command": "macaulay2.startREPL",
-				"key": "F12"
-			}
-		],
-		"problemMatchers": [
-			{
-				"name": "macaulay2",
-				"pattern": {
-					"regexp": "^(.+\\.m2):(\\d+):(\\d+):\\s*(.*?)$",
-					"file": 1,
-					"line": 2,
-					"column": 3,
-					"message": 4
-				},
-				"background": {
-					"activeOnStart": true,
-					"beginsPattern": ".*",
-					"endsPattern": ".*"
-				}
-			}
-		],
-		"markdown.markdownItPlugins": true
-	},
-	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p tsconfig.backend.json && tsc -p tsconfig.webview.json",
-		"watch-backend": "tsc -w -p tsconfig.backend.json",
-		"watch-webview": "tsc -w -p tsconfig.webview.json",
-		"watch": "npm-run-all --parallel watch-backend watch-webview",
-		"clean": "rimraf node_modules out dist package-lock.json",
-		"test": "vscode-test",
-	        "update": "M2 --script generate-grammar.m2",
-	        "format": "prettier --write ."
-	},
-	"devDependencies": {
-		"@types/mocha": "^2.2.48",
-		"@types/node": "^10.12.21",
-		"@types/vscode": "^1.100.0",
-		"@vscode/test-cli": "^0.0.10",
-		"@vscode/test-electron": "^2.5.2",
-		"npm-run-all": "^4.1.5",
-		"rimraf": "^6.0.1",
-		"tslint": "^5.12.1",
-	        "typescript": "^5.4.0",
-	    	"prettier": "^3.5.3"
-	},
-	"dependencies": {
-		"highlight.js": "^11.11.1",
-		"highlightjs-macaulay2": "^0.4.2"
-	}
+  "name": "macaulay2",
+  "displayName": "Macaulay2",
+  "description": "Macaulay2 language support",
+  "version": "0.6.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Macaulay2/vscode-macaulay2"
+  },
+  "publisher": "M2",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:macaulay2"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "macaulay2.startREPL",
+        "title": "Start M2 REPL"
+      },
+      {
+        "command": "macaulay2.sendToREPL",
+        "title": "Send code to Macaulay2 REPL"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "macaulay2",
+        "scopeName": "source.macaulay2",
+        "path": "./syntaxes/macaulay2.tmLanguage.json"
+      },
+      {
+        "scopeName": "markdown.macaulay2.codeblock",
+        "path": "./syntaxes/codeblock.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.macaulay2": "macaulay2"
+        }
+      }
+    ],
+    "languages": [
+      {
+        "id": "macaulay2",
+        "aliases": [
+          "Macaulay2",
+          "macaulay2"
+        ],
+        "extensions": [
+          ".m2"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "configuration": {
+      "title": "Macaulay2",
+      "properties": {
+        "macaulay2.executablePath": {
+          "type": "string",
+          "default": "M2",
+          "description": "Location of Macaulay2 executable",
+          "scope": "application"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "macaulay2.sendToREPL",
+        "key": "shift+Enter",
+        "when": "editorLangId == macaulay2"
+      },
+      {
+        "command": "macaulay2.startREPL",
+        "key": "F12"
+      }
+    ],
+    "problemMatchers": [
+      {
+        "name": "macaulay2",
+        "pattern": {
+          "regexp": "^(.+\\.m2):(\\d+):(\\d+):\\s*(.*?)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "message": 4
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": ".*"
+        }
+      }
+    ],
+    "markdown.markdownItPlugins": true
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p tsconfig.backend.json && tsc -p tsconfig.webview.json",
+    "watch-backend": "tsc -w -p tsconfig.backend.json",
+    "watch-webview": "tsc -w -p tsconfig.webview.json",
+    "watch": "npm-run-all --parallel watch-backend watch-webview",
+    "clean": "rimraf node_modules out dist package-lock.json",
+    "test": "vscode-test",
+    "update": "M2 --script generate-grammar.m2",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.48",
+    "@types/node": "^10.12.21",
+    "@types/vscode": "^1.100.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.5.2",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^6.0.1",
+    "tslint": "^5.12.1",
+    "typescript": "^5.4.0",
+    "prettier": "^3.5.3"
+  },
+  "dependencies": {
+    "highlight.js": "^11.11.1",
+    "highlightjs-macaulay2": "^0.4.2"
+  }
 }

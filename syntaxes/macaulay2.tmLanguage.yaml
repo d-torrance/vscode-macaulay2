@@ -3,27 +3,27 @@ scopeName: source.macaulay2
 fileTypes: [m2]
 
 patterns:
-- include: '#comments'
-- include: '#strings'
-- include: '#keywords'
-- include: '#support'
+  - include: "#comments"
+  - include: "#strings"
+  - include: "#keywords"
+  - include: "#support"
 
 # variables:
 #   variableName: (\w)
 
 repository:
   storage:
-    patterns: 
+    patterns:
       - name: meta.function.macaulay2
         match: (\)
   keywords:
     patterns:
       - name: keyword.control.macaulay2
-        match: (x?)\b(break|catch|continue|do|else|end|for|from|if|in|list|of|restart|return|step|then|throw|to|try|when|while)\b 
+        match: (x?)\b(break|catch|continue|do|else|end|for|from|if|in|list|of|restart|return|step|then|throw|to|try|when|while)\b
       - name: keyword.operator.macaulay2
-        match: (x?)\b(and|not|or)\b 
+        match: (x?)\b(and|not|or)\b
       - name: keyword.other.macaulay2
-        match: (x?)\b(global|local|new|shield|SPACE|symbol|threadVariable|time|timing)\b 
+        match: (x?)\b(global|local|new|shield|SPACE|symbol|threadVariable|time|timing)\b
       - name: keyword.operator.functionArrow.macaulay2
         match: ->
       - name: keyword.operator.optionArrow.macaulay2

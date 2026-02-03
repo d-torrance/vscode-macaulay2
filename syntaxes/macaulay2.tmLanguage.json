@@ -1,9 +1,7 @@
 {
   "name": "Macaulay2",
   "scopeName": "source.macaulay2",
-  "fileTypes": [
-    "m2"
-  ],
+  "fileTypes": ["m2"],
   "patterns": [
     {
       "include": "#comments"

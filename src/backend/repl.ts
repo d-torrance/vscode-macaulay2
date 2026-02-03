@@ -23,12 +23,15 @@ function startM2() {
   // Determine the working directory for Macaulay2
   let workingDir: string;
   const activeEditor = vscode.window.activeTextEditor;
-  
-  if (activeEditor && activeEditor.document.uri.scheme === 'file') {
+
+  if (activeEditor && activeEditor.document.uri.scheme === "file") {
     // Use the directory of the currently active file
     workingDir = path.dirname(activeEditor.document.uri.fsPath);
     console.log(`Starting M2 in current file directory: ${workingDir}`);
-  } else if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+  } else if (
+    vscode.workspace.workspaceFolders &&
+    vscode.workspace.workspaceFolders.length > 0
+  ) {
     // Use the first workspace folder
     workingDir = vscode.workspace.workspaceFolders[0].uri.fsPath;
     console.log(`Starting M2 in workspace root: ${workingDir}`);
@@ -62,14 +65,16 @@ function startM2() {
   proc.on("error", (err) => {
     console.error("M2 process error:", err);
     if (g_panel)
-      g_panel.webview.postMessage({ type: "output", data: `Error starting Macaulay2: ${err.message}` });
+      g_panel.webview.postMessage({
+        type: "output",
+        data: `Error starting Macaulay2: ${err.message}`,
+      });
     proc = undefined;
   });
 
   proc.on("close", (code, signal) => {
     console.log("M2 process closed. code=", code, "signal=", signal);
-    if (g_panel)
-      g_panel.webview.postMessage({ type: "exit", code, signal });
+    if (g_panel) g_panel.webview.postMessage({ type: "exit", code, signal });
     proc = undefined;
   });
 
@@ -185,23 +190,31 @@ function getWebviewContent(webview: vscode.Webview) {
 }
 
 function parseVSCodeFragment(pathWithFragment: string): {
-  path: string,
-  start?: { line: number, column: number },
-  end?: { line: number, column: number }
+  path: string;
+  start?: { line: number; column: number };
+  end?: { line: number; column: number };
 } {
   const re = /^(.*?)(?:#\D*(\d+)(?::\D*(\d+))?(?:-\D*(\d+)(?::\D*(\d+))?)?)?$/;
   const m = pathWithFragment.match(re);
   if (!m) return { path: pathWithFragment };
 
-  const [ , path, line1, col1, line2, col2 ] = m;
+  const [, path, line1, col1, line2, col2] = m;
   let result: {
-    path: string,
-    start?: { line: number, column: number },
-    end?: { line: number, column: number }
+    path: string;
+    start?: { line: number; column: number };
+    end?: { line: number; column: number };
   } = { path };
 
-  if (line1) result.start = { line: parseInt(line1) - 1, column: col1 ? parseInt(col1) : 0 }; // TODO check shifts by 1
-  if (line2) result.end   = { line: parseInt(line2) - 1, column: col2 ? parseInt(col2) : 0 };
+  if (line1)
+    result.start = {
+      line: parseInt(line1) - 1,
+      column: col1 ? parseInt(col1) : 0,
+    }; // TODO check shifts by 1
+  if (line2)
+    result.end = {
+      line: parseInt(line2) - 1,
+      column: col2 ? parseInt(col2) : 0,
+    };
   return result;
 }
 
@@ -227,7 +240,12 @@ function handleWebviewMessage(message: any) {
           // On Windows, proc.kill('SIGINT') may not work. Attempt taskkill as a fallback.
           if (process.platform === "win32" && proc.pid) {
             try {
-              const killer = spawn("taskkill", ["/PID", String(proc.pid), "/T", "/F"]);
+              const killer = spawn("taskkill", [
+                "/PID",
+                String(proc.pid),
+                "/T",
+                "/F",
+              ]);
               killer.on("close", () => {
                 console.log("taskkill executed for pid", proc!.pid);
               });
@@ -239,18 +257,32 @@ function handleWebviewMessage(message: any) {
       }
       break;
     case "open":
-      console.log("open "+message.data);
+      console.log("open " + message.data);
       // fix relative path: relative to where M2 was started
       const { path: relPath, start, end } = parseVSCodeFragment(message.data);
       let selection;
       if (start && end) {
-	selection = new vscode.Range(start.line, start.column, end.line, end.column);
+        selection = new vscode.Range(
+          start.line,
+          start.column,
+          end.line,
+          end.column,
+        );
       } else if (start) {
-	selection = new vscode.Range(start.line, start.column, start.line, start.column);
+        selection = new vscode.Range(
+          start.line,
+          start.column,
+          start.line,
+          start.column,
+        );
       }
       const absPath = path.resolve(procWorkingDir!, relPath);
       const fileUri = vscode.Uri.file(absPath);
-      vscode.window.showTextDocument(fileUri, { preview: false, selection, viewColumn: vscode.ViewColumn.One });
+      vscode.window.showTextDocument(fileUri, {
+        preview: false,
+        selection,
+        viewColumn: vscode.ViewColumn.One,
+      });
       break;
     case "focus":
       const editor = vscode.window.activeTextEditor;
