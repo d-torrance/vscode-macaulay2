@@ -43,9 +43,11 @@ Array.prototype.sortedPush = function (el: any) {
 
   while (m <= n) {
     const k = (n + m) >> 1;
-    if (el > this[k]) m = k + 1;
-    else if (el < this[k]) n = k - 1;
-    else {
+    if (el > this[k]) {
+      m = k + 1;
+    } else if (el < this[k]) {
+      n = k - 1;
+    } else {
       m = -1;
       n = -2;
     }
@@ -694,9 +696,11 @@ const Shell = function (
           emit("open", fragment);
         };
 
-        if (inputSpan && inputSpan.parentElement == htmlSec)
+        if (inputSpan && inputSpan.parentElement === htmlSec) {
           htmlSec.insertBefore(link, inputSpan);
-        else htmlSec.appendChild(link);
+        } else {
+          htmlSec.appendChild(link);
+        }
 
         lastIndex = match.index + fullMatch.length;
       }
@@ -705,16 +709,20 @@ const Shell = function (
       if (lastIndex < msg.length) {
         const textAfter = msg.substring(lastIndex);
         const textNode = document.createTextNode(textAfter);
-        if (inputSpan && inputSpan.parentElement == htmlSec)
+        if (inputSpan && inputSpan.parentElement === htmlSec) {
           htmlSec.insertBefore(textNode, inputSpan);
-        else htmlSec.appendChild(textNode);
+        } else {
+          htmlSec.appendChild(textNode);
+        }
       }
     } else {
       // No error patterns found, display text normally
       const node = document.createTextNode(msg);
-      if (inputSpan && inputSpan.parentElement == htmlSec)
+      if (inputSpan && inputSpan.parentElement === htmlSec) {
         htmlSec.insertBefore(node, inputSpan);
-      else htmlSec.appendChild(node);
+      } else {
+        htmlSec.appendChild(node);
+      }
     }
   };
 
@@ -725,7 +733,9 @@ const Shell = function (
     interpreterDepth = 1;
   };
   const resetBtn = document.getElementById("resetBtn");
-  if (resetBtn) resetBtn.onclick = obj.reset;
+  if (resetBtn) {
+    resetBtn.onclick = obj.reset;
+  }
 
   obj.interrupt = function () {
     inputSpan.textContent = "";
@@ -733,7 +743,9 @@ const Shell = function (
     setCaretAtEndMaybe(inputSpan);
   };
   const interruptBtn = document.getElementById("interruptBtn");
-  if (interruptBtn) interruptBtn.onclick = obj.interrupt;
+  if (interruptBtn) {
+    interruptBtn.onclick = obj.interrupt;
+  }
 
   obj.locateStdio = function (cel: HTMLElement, row: number, column: number) {
     // find relevant input from stdio:row:column
@@ -741,36 +753,48 @@ const Shell = function (
     const pastInputs = Array.from(
       cel.querySelectorAll(query) as NodeListOf<HTMLElement>,
     );
-    if (pastInputs.length == 0) return null;
+    if (pastInputs.length === 0) {
+      return null;
+    }
 
     const m = pastInputs.map((p) => p.dataset.positions.match(/ (\d+):(\d+) /));
     let i = 0;
     while (
       i + 1 < pastInputs.length &&
-      (+m[i + 1][1] < row || (+m[i + 1][1] == row && +m[i + 1][2] <= column))
-    )
+      (+m[i + 1][1] < row || (+m[i + 1][1] === row && +m[i + 1][2] <= column))
+    ) {
       i++;
+    }
     const m1 = m[i];
     const txt = pastInputs[i].textContent;
     const offset = locateRowColumn(
       txt,
       row - +m1[1] + 1,
-      row == +m1[1] ? column - +m1[2] : column,
+      row === +m1[1] ? column - +m1[2] : column,
     );
-    if (offset === null) return null;
+    if (offset === null) {
+      return null;
+    }
     const nodeOffset = locateOffset(pastInputs[i], offset);
-    if (nodeOffset)
+    if (nodeOffset) {
       // should always be true
       return [nodeOffset[0], nodeOffset[1], pastInputs[i], offset]; // node, offset in node, element, offset in element
+    }
   };
 
   obj.selectPastInput = function (el: HTMLElement, rowcols) {
     const cel = sessionCell(el);
-    if (!cel) return;
+    if (!cel) {
+      return;
+    }
     const nodeOffset1 = obj.locateStdio(cel, rowcols[0], rowcols[1]);
-    if (!nodeOffset1) return;
+    if (!nodeOffset1) {
+      return;
+    }
     const nodeOffset2 = obj.locateStdio(cel, rowcols[2], rowcols[3]);
-    if (!nodeOffset2 || nodeOffset2[2] != nodeOffset1[2]) return;
+    if (!nodeOffset2 || nodeOffset2[2] !== nodeOffset1[2]) {
+      return;
+    }
     const sel = window.getSelection();
     sel.setBaseAndExtent(
       nodeOffset1[0],
@@ -779,8 +803,9 @@ const Shell = function (
       nodeOffset2[1],
     );
     const marker = addMarkerPos(nodeOffset2[0], nodeOffset2[1]);
-    if (rowcols[0] == rowcols[2] && rowcols[1] == rowcols[3])
+    if (rowcols[0] === rowcols[2] && rowcols[1] === rowcols[3]) {
       marker.classList.add("caret-marker");
+    }
     setTimeout(function () {
       marker.scrollIntoView({
         behavior: "smooth",
@@ -790,10 +815,11 @@ const Shell = function (
     }, 100);
   };
 
-  if (inputSpan)
+  if (inputSpan) {
     window.addEventListener("load", function () {
       inputSpan.focus();
     });
+  }
 };
 
 export { Shell };

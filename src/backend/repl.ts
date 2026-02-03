@@ -51,30 +51,35 @@ function startM2() {
   procWorkingDir = workingDir;
 
   proc.stdout.on("data", (data) => {
-    if (g_panel)
+    if (g_panel) {
       g_panel.webview.postMessage({ type: "output", data: data.toString() });
+    }
   });
 
   proc.stderr.on("data", (data) => {
     // forward stderr as output too
     console.log("M2 stderr:", data.toString());
-    if (g_panel)
+    if (g_panel) {
       g_panel.webview.postMessage({ type: "output", data: data.toString() });
+    }
   });
 
   proc.on("error", (err) => {
     console.error("M2 process error:", err);
-    if (g_panel)
+    if (g_panel) {
       g_panel.webview.postMessage({
         type: "output",
         data: `Error starting Macaulay2: ${err.message}`,
       });
+    }
     proc = undefined;
   });
 
   proc.on("close", (code, signal) => {
     console.log("M2 process closed. code=", code, "signal=", signal);
-    if (g_panel) g_panel.webview.postMessage({ type: "exit", code, signal });
+    if (g_panel) {
+      g_panel.webview.postMessage({ type: "exit", code, signal });
+    }
     proc = undefined;
   });
 
@@ -196,7 +201,9 @@ function parseVSCodeFragment(pathWithFragment: string): {
 } {
   const re = /^(.*?)(?:#\D*(\d+)(?::\D*(\d+))?(?:-\D*(\d+)(?::\D*(\d+))?)?)?$/;
   const m = pathWithFragment.match(re);
-  if (!m) return { path: pathWithFragment };
+  if (!m) {
+    return { path: pathWithFragment };
+  }
 
   const [, path, line1, col1, line2, col2] = m;
   let result: {
@@ -205,16 +212,18 @@ function parseVSCodeFragment(pathWithFragment: string): {
     end?: { line: number; column: number };
   } = { path };
 
-  if (line1)
+  if (line1) {
     result.start = {
       line: parseInt(line1) - 1,
       column: col1 ? parseInt(col1) : 0,
     }; // TODO check shifts by 1
-  if (line2)
+  }
+  if (line2) {
     result.end = {
       line: parseInt(line2) - 1,
       column: col2 ? parseInt(col2) : 0,
     };
+  }
   return result;
 }
 
@@ -225,7 +234,9 @@ function handleWebviewMessage(message: any) {
       break;
     case "reset":
       console.log("reset");
-      if (proc) proc.kill();
+      if (proc) {
+        proc.kill();
+      }
       procWorkingDir = undefined; // Reset working directory
       startM2();
       break;
@@ -286,12 +297,13 @@ function handleWebviewMessage(message: any) {
       break;
     case "focus":
       const editor = vscode.window.activeTextEditor;
-      if (editor)
+      if (editor) {
         vscode.window.showTextDocument(
           editor!.document,
           editor!.viewColumn,
           false,
         ); // restore focus
+      }
       break;
   }
 }
