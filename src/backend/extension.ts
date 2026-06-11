@@ -2,32 +2,22 @@
 // Import the module and reference it with the alias vscode in your code below
 "use strict";
 
-import * as fs from "fs";
-import * as path from "path";
 import * as vscode from "vscode";
 import * as repl from "./repl";
 import * as formatter from "./formatter";
-import client from "./client";
+import client, { configureLanguageServer } from "./client";
+import { resolveCommandExecutable } from "./executablePath";
 import hljs from "highlight.js/lib/core";
 import hljsM2 from "highlightjs-macaulay2";
 
 hljs.registerLanguage("macaulay2", hljsM2);
 
+const LANGUAGE_SERVER_COMMAND = "M2-language-server";
+
 type CompletionProviderModule = typeof import("./completionProviders");
 
 function isMacaulay2Document(document: vscode.TextDocument): boolean {
   return document.languageId === "macaulay2";
-}
-
-function isLanguageServerAvailable(): boolean {
-  return (process.env.PATH ?? "").split(path.delimiter).some((dir) => {
-    try {
-      fs.accessSync(path.join(dir, "M2-language-server"), fs.constants.X_OK);
-      return true;
-    } catch {
-      return false;
-    }
-  });
 }
 
 // this method is called when your extension is activated
@@ -40,6 +30,8 @@ export function activate(context: vscode.ExtensionContext) {
   let completionsModule: Promise<CompletionProviderModule> | undefined;
   let completionsActivated = false;
   let activateCompletionsPromise: Promise<void> | undefined;
+  let languageServerStarted = false;
+  let languageServerStartPromise: Thenable<void> | undefined;
   const loadCompletions = () => {
     if (!completionsModule) {
       completionsModule = import("./completionProviders");
@@ -67,14 +59,96 @@ export function activate(context: vscode.ExtensionContext) {
     return completions.getWebviewCompletionItems();
   };
 
+  const isLanguageServerEnabled = () =>
+    vscode.workspace
+      .getConfiguration("macaulay2")
+      .get<boolean>("enableLanguageServer", true);
+
+  const showLanguageServerStartError = (error: unknown) => {
+    void vscode.window.showErrorMessage(
+      `Failed to start Macaulay2 Language Server: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  };
+
+  const configureResolvedLanguageServer = () => {
+    const resolution = resolveCommandExecutable(LANGUAGE_SERVER_COMMAND);
+    if (!resolution) {
+      return false;
+    }
+
+    configureLanguageServer(resolution.executablePath, resolution.args);
+    return true;
+  };
+
+  const startLanguageServer = () => {
+    if (languageServerStarted) {
+      return Promise.resolve();
+    }
+    if (languageServerStartPromise) {
+      return languageServerStartPromise;
+    }
+    if (!isLanguageServerEnabled() || !configureResolvedLanguageServer()) {
+      return Promise.resolve();
+    }
+
+    languageServerStartPromise = client
+      .start()
+      .then(() => {
+        languageServerStarted = true;
+      })
+      .catch((error) => {
+        showLanguageServerStartError(error);
+      })
+      .finally(() => {
+        languageServerStartPromise = undefined;
+      });
+    return languageServerStartPromise;
+  };
+
+  const restartLanguageServer = async () => {
+    if (!isLanguageServerEnabled()) {
+      void vscode.window.showInformationMessage(
+        "Macaulay2 Language Server is disabled.",
+      );
+      return;
+    }
+
+    if (!configureResolvedLanguageServer()) {
+      void vscode.window.showWarningMessage(
+        `${LANGUAGE_SERVER_COMMAND} was not found.`,
+      );
+      return;
+    }
+
+    try {
+      if (languageServerStartPromise) {
+        await languageServerStartPromise;
+      }
+
+      if (languageServerStarted) {
+        await client.restart();
+      } else {
+        await client.start();
+        languageServerStarted = true;
+      }
+    } catch (error) {
+      languageServerStarted = false;
+      showLanguageServerStartError(error);
+    }
+  };
+
   if (vscode.workspace.textDocuments.some(isMacaulay2Document)) {
     void activateCompletions();
+    void startLanguageServer();
   }
 
   context.subscriptions.push(
     vscode.workspace.onDidOpenTextDocument((document) => {
       if (isMacaulay2Document(document)) {
         void activateCompletions();
+        void startLanguageServer();
       }
     }),
   );
@@ -82,6 +156,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor && isMacaulay2Document(editor.document)) {
         void activateCompletions();
+        void startLanguageServer();
       }
     }),
   );
@@ -101,20 +176,13 @@ export function activate(context: vscode.ExtensionContext) {
 
   repl.activate(context, getWebviewCompletionItems);
   formatter.activate(context);
-  const config = vscode.workspace.getConfiguration("macaulay2");
-  if (config.get<boolean>("enableLanguageServer", true) && isLanguageServerAvailable()) {
-    context.subscriptions.push(client);
-    context.subscriptions.push(
-      vscode.commands.registerCommand("macaulay2.restartLanguageServer", () =>
-        client.restart()
-      )
-    );
-    client.start().catch((error) => {
-      void vscode.window.showErrorMessage(
-        `Failed to start Macaulay2 Language Server: ${error instanceof Error ? error.message : String(error)}`
-      );
-    });
-  }
+  context.subscriptions.push(client);
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "macaulay2.restartLanguageServer",
+      restartLanguageServer,
+    ),
+  );
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
@@ -122,14 +190,14 @@ export function activate(context: vscode.ExtensionContext) {
         void vscode.window
           .showInformationMessage(
             "Reload the window to apply language server changes.",
-            "Reload"
+            "Reload",
           )
           .then((selection) => {
             if (selection === "Reload")
               vscode.commands.executeCommand("workbench.action.reloadWindow");
           });
       }
-    })
+    }),
   );
 
   return {
