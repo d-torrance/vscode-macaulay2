@@ -16,7 +16,49 @@ export interface M2LaunchConfiguration {
   cwd?: string;
 }
 
+export interface CommandExecutableResolution {
+  executablePath: string;
+  source: string;
+  args?: string[];
+}
+
 export type M2LaunchArgsConfiguration = string | undefined;
+
+export function resolveCommandExecutable(
+  command: string,
+): CommandExecutableResolution | undefined {
+  const fromPath = findCommandOnPath(command);
+  if (fromPath) {
+    return { executablePath: fromPath, source: "PATH" };
+  }
+
+  if (process.platform === "win32") {
+    const fromCygwinShell = resolveCommandWithCygwinShell(command);
+    if (fromCygwinShell) {
+      return {
+        executablePath: fromCygwinShell,
+        source: "Cygwin shell",
+      };
+    }
+
+    const fromWsl = resolveCommandWithWsl(command);
+    if (fromWsl) {
+      return fromWsl;
+    }
+
+    return undefined;
+  }
+
+  const fromLoginShell = resolveCommandWithLoginShell(command);
+  if (fromLoginShell) {
+    return {
+      executablePath: fromLoginShell,
+      source: "login shell PATH",
+    };
+  }
+
+  return undefined;
+}
 
 export function resolveM2Executable(
   configuredPath?: string,
@@ -265,12 +307,20 @@ function resolveManualWslExecutable(
 }
 
 function resolveWithLoginShell(): string | undefined {
+  return resolveCommandWithLoginShell("M2");
+}
+
+function resolveCommandWithLoginShell(command: string): string | undefined {
   const shell = getEnv("SHELL");
   if (!shell || !path.isAbsolute(shell) || !fs.existsSync(shell)) {
     return undefined;
   }
 
-  const resolved = runShellCommand(shell, ["-l", "-c", "command -v M2"]);
+  const resolved = runShellCommand(shell, [
+    "-l",
+    "-c",
+    `command -v ${quoteShellWord(command)}`,
+  ]);
   if (resolved && isExecutableFile(resolved)) {
     return resolved;
   }
@@ -279,6 +329,10 @@ function resolveWithLoginShell(): string | undefined {
 }
 
 function resolveWithCygwinShell(): string | undefined {
+  return resolveCommandWithCygwinShell("M2");
+}
+
+function resolveCommandWithCygwinShell(command: string): string | undefined {
   const bashCandidates = [
     findCommandOnPath("bash"),
     ...getWindowsCandidateRoots().map((root) =>
@@ -291,9 +345,10 @@ function resolveWithCygwinShell(): string | undefined {
       continue;
     }
 
+    const quotedCommand = quoteShellWord(command);
     const resolved = runShellCommand(bashPath, [
       "-lc",
-      'if command -v M2 >/dev/null 2>&1; then cygpath -wa "$(command -v M2)"; fi',
+      `if command -v ${quotedCommand} >/dev/null 2>&1; then cygpath -wa "$(command -v ${quotedCommand})"; fi`,
     ]);
     if (resolved && isExecutableFile(resolved)) {
       return resolved;
@@ -304,6 +359,22 @@ function resolveWithCygwinShell(): string | undefined {
 }
 
 function resolveWithWsl(): M2ExecutableResolution | undefined {
+  const resolved = resolveCommandWithWsl("M2");
+  if (!resolved?.args || resolved.args.length < 2) {
+    return undefined;
+  }
+
+  return {
+    executablePath: resolved.executablePath,
+    source: resolved.source,
+    wslExecutablePath: resolved.args[1],
+    wslDistroName: resolveWslDistroName(resolved.executablePath),
+  };
+}
+
+function resolveCommandWithWsl(
+  command: string,
+): CommandExecutableResolution | undefined {
   const wslPath = findWslExecutable();
   if (!wslPath) {
     return undefined;
@@ -311,7 +382,7 @@ function resolveWithWsl(): M2ExecutableResolution | undefined {
 
   const resolved = runShellCommand(
     wslPath,
-    ["--exec", "sh", "-lc", "command -v M2"],
+    ["--exec", "sh", "-lc", `command -v ${quoteShellWord(command)}`],
     5000,
   );
   const wslExecutablePath = normalizeShellOutputPath(resolved);
@@ -322,8 +393,7 @@ function resolveWithWsl(): M2ExecutableResolution | undefined {
   return {
     executablePath: wslPath,
     source: "WSL",
-    wslExecutablePath,
-    wslDistroName: resolveWslDistroName(wslPath),
+    args: ["--exec", wslExecutablePath],
   };
 }
 
@@ -390,6 +460,10 @@ function normalizeShellOutputPath(
     ?.split(/\r?\n/)
     .map((line) => line.trim())
     .find(Boolean);
+}
+
+function quoteShellWord(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
 }
 
 function findCommandOnPath(command: string): string | undefined {
