@@ -173,6 +173,27 @@ suite("Extension Tests", function () {
       },
     );
   });
+
+  test("defines newline-safe WebApp output layout", function () {
+    const webviewTemplate = fs.readFileSync(
+      path.join(__dirname, "../../media/webview.html"),
+      "utf8",
+    );
+
+    assert.ok(
+      /\.M2Cell\s*{[^}]*white-space:\s*normal;[^}]*}/.test(webviewTemplate),
+    );
+    assert.ok(
+      /\.M2Cell\s*>\s*\.M2Input,\s*\.M2Cell\s*>\s*\.M2OutputScroll,\s*\.M2Cell\s*>\s*\.M2StandardOutput\s*{[^}]*white-space:\s*pre;[^}]*}/.test(
+        webviewTemplate,
+      ),
+    );
+    assert.ok(
+      /\.M2OutputScroll\s*>\s*\.M2Html\s*{[^}]*display:\s*block;[^}]*width:\s*fit-content;[^}]*}/.test(
+        webviewTemplate,
+      ),
+    );
+  });
 });
 
 suite("Macaulay2 Formatter", function () {

@@ -193,6 +193,13 @@
         max-width: 100%;
         min-width: 0;
         overflow-x: hidden;
+        white-space: normal;
+      }
+
+      .M2Cell > .M2Input,
+      .M2Cell > .M2OutputScroll,
+      .M2Cell > .M2StandardOutput {
+        white-space: pre;
       }
 
       .M2Input {
@@ -232,7 +239,9 @@
       }
 
       .M2OutputScroll > .M2Html {
+        display: block;
         max-width: none;
+        width: fit-content;
       }
 
       .M2OutputScroll > .M2Html:has(code, pre, samp:not(.token), span.tt, tt) {
@@ -273,6 +282,15 @@
 
       .M2Html {
         max-width: 100%;
+      }
+
+      .M2Html .katex .M2Html > ul[style*="display:inline-table"],
+      .M2Html .katex .M2Html > ul[style*="display: inline-table"] {
+        line-height: 1.2;
+        list-style: none;
+        margin: 0;
+        padding-left: 0;
+        vertical-align: middle;
       }
 
       .M2CompletionMenu {
