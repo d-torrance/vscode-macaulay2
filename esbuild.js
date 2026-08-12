@@ -16,12 +16,17 @@ async function build() {
   if (test) {
     const testCtx = await esbuild.context({
       ...baseConfig,
-      entryPoints: ["src/backend/test/extension.test.ts"],
-      outfile: "out/test/extension.test.js",
+      entryPoints: [
+        "src/backend/test/extension.test.ts",
+        "src/backend/test/grammar.test.ts",
+      ],
+      outdir: "out/test",
       platform: "node",
       format: "cjs",
       target: "node18",
-      external: ["vscode"],
+      // vscode-oniguruma loads onig.wasm relative to its own location, so it
+      // has to stay in node_modules rather than being bundled.
+      external: ["vscode", "vscode-textmate", "vscode-oniguruma"],
     });
 
     if (watch) {

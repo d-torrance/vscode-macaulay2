@@ -34,6 +34,7 @@ import {
   shouldCloseWebviewOnM2Input,
 } from "../repl";
 import { formatMacaulay2Text } from "../formatter";
+import { spacedOperators } from "../operators";
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
@@ -81,9 +82,7 @@ function getM2StartupPatchCompatibilityScript(): string {
 }
 
 function writeTemporaryM2Script(contents: string): string {
-  const directory = fs.mkdtempSync(
-    path.join(os.tmpdir(), "vscode-macaulay2-"),
-  );
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "vscode-macaulay2-"));
   const scriptPath = path.join(directory, "startup-patch-compatibility.m2");
   fs.writeFileSync(scriptPath, contents, "utf8");
   return scriptPath;
@@ -256,61 +255,14 @@ suite("Macaulay2 Formatter", function () {
   });
 
   test("keeps Macaulay2 operators containing equals intact", function () {
-    const operators = [
-      "===>=",
-      "_<=",
-      "|-=",
-      "=!=",
-      "|_=",
-      "!=",
-      "@@=",
-      "=",
-      "..<=",
-      "|=",
-      "===>",
-      ":=",
-      "*=",
-      "??=",
-      "//=",
-      "_>=",
-      "==>=",
-      "^<=",
-      "\\=",
-      "+=",
-      ">>=",
-      "^^=",
-      "..=",
-      "~=",
-      "<=",
-      "\u2298=",
-      "<==>=",
-      "===",
-      "^>=",
-      "==>",
-      "^=",
-      "\u29e2=",
-      "==",
-      "=>",
-      "\u00b7=",
-      "-=",
-      "%=",
-      "\\\\=",
-      "||=",
-      "<<=",
-      "_=",
-      ">=",
-      "&=",
-      "<==",
-      "++=",
-      "@@?=",
-      "^**=",
-      "<===",
-      "<==>",
-      "/=",
-      "**=",
-      "@=",
-    ];
-    const input = operators.map((operator) => `left${operator}right`).join("\n");
+    // Driven by the generated list rather than a hand-typed copy, which had
+    // drifted: it carried a bogus U+2298 and was missing the real U+22A0.
+    const operators = spacedOperators.filter((operator) =>
+      operator.includes("="),
+    );
+    const input = operators
+      .map((operator) => `left${operator}right`)
+      .join("\n");
     const expected = operators
       .map((operator) => `left ${operator} right`)
       .concat("")
@@ -536,10 +488,11 @@ suite("Executable Launch", function () {
   });
 
   test("normalizes configured M2 launch arguments", function () {
-    assert.deepEqual(
-      normalizeM2LaunchArgs(" --silent   --print-width 120 "),
-      ["--silent", "--print-width", "120"],
-    );
+    assert.deepEqual(normalizeM2LaunchArgs(" --silent   --print-width 120 "), [
+      "--silent",
+      "--print-width",
+      "120",
+    ]);
     assert.deepEqual(normalizeM2LaunchArgs(""), []);
     assert.deepEqual(normalizeM2LaunchArgs("--print-width 50"), [
       "--print-width",
@@ -568,9 +521,7 @@ suite("Executable Launch", function () {
       "/home/admin/m2-project",
     );
     assert.equal(
-      windowsPathToWslPath(
-        "\\\\wsl.localhost\\Ubuntu\\usr\\share\\Macaulay2",
-      ),
+      windowsPathToWslPath("\\\\wsl.localhost\\Ubuntu\\usr\\share\\Macaulay2"),
       "/usr/share/Macaulay2",
     );
   });
