@@ -1,6 +1,7 @@
 declare const MINIMAL;
 // import { autoRender } from "./autoRender";
 import { webAppTags, webAppClasses, webAppRegex } from "./tags.js";
+import { shouldAppendProtocolNewlineToPreviousOutput } from "./outputLayout.js";
 import {
   scrollDownLeft,
   scrollDown,
@@ -1797,12 +1798,13 @@ const Shell = function (
             ? beforeNode.previousElementSibling
             : htmlSec.lastElementChild;
         if (
-          txt === "\n" &&
           previous &&
-          previous.classList.contains(outputScrollClass) &&
-          previous.classList.contains(standardOutputClass) ==
-            (outputMode === "standard") &&
-          outputContainerOwnsNewline(previous)
+          shouldAppendProtocolNewlineToPreviousOutput(
+            txt,
+            previous.classList.contains(outputScrollClass),
+            previous.classList.contains(standardOutputClass),
+            outputMode,
+          )
         )
           return previous as HTMLElement;
         return htmlSec;
@@ -1811,15 +1813,6 @@ const Shell = function (
         htmlSec,
         inputSpan && inputSpan.parentElement == htmlSec ? inputSpan : null,
         outputMode === "standard",
-      );
-    };
-    const outputContainerOwnsNewline = function (previous: Element) {
-      return (
-        outputMode === "standard" ||
-        !(
-          previous.lastElementChild &&
-          previous.lastElementChild.classList.contains("M2Html")
-        )
       );
     };
     const target = displayTarget(msg);

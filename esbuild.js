@@ -16,8 +16,11 @@ async function build() {
   if (test) {
     const testCtx = await esbuild.context({
       ...baseConfig,
-      entryPoints: ["src/backend/test/extension.test.ts"],
-      outfile: "out/test/extension.test.js",
+      entryPoints: {
+        "extension.test": "src/backend/test/extension.test.ts",
+        "outputLayout.test": "src/webview/test/outputLayout.test.ts",
+      },
+      outdir: "out/test",
       platform: "node",
       format: "cjs",
       target: "node18",

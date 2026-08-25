@@ -193,13 +193,6 @@
         max-width: 100%;
         min-width: 0;
         overflow-x: hidden;
-        white-space: normal;
-      }
-
-      .M2Cell > .M2Input,
-      .M2Cell > .M2OutputScroll,
-      .M2Cell > .M2StandardOutput {
-        white-space: pre;
       }
 
       .M2Input {
@@ -239,9 +232,11 @@
       }
 
       .M2OutputScroll > .M2Html {
-        display: block;
         max-width: none;
-        width: fit-content;
+      }
+
+      .M2OutputScroll > .M2Html:has(> samp.token.string:only-child) {
+        display: inline;
       }
 
       .M2OutputScroll > .M2Html:has(code, pre, samp:not(.token), span.tt, tt) {
