@@ -3,12 +3,12 @@
 -- syntaxes/m2-tokens.json, then let scripts/generate-syntax.js expand the
 -- .in templates.
 --
--- The templating deliberately happens in node rather than here.  Macaulay2 is
--- not installed on the CI runner, so keeping the substitution step in plain
--- JavaScript -- with m2-tokens.json checked in -- is what lets CI verify that
--- the committed grammars actually match their templates.  (M2's replace also
--- reads backslashes in the replacement text as backreferences, which the
--- operator alternations are full of.)
+-- The templating deliberately happens in node rather than here.  Keeping the
+-- substitution step in plain JavaScript -- with m2-tokens.json checked in --
+-- lets the tests verify that the committed grammars match their templates
+-- without starting Macaulay2.  (M2's replace also reads backslashes in the
+-- replacement text as backreferences, which the operator alternations are
+-- full of.)
 --
 -- Run via "npm run update", which invokes this and then the node script.
 -------------------------------------------------------------------------------

@@ -3,8 +3,8 @@
 // generate-grammar.m2 produces from a running Macaulay2.
 //
 // This half is deliberately plain JavaScript with no Macaulay2 dependency:
-// m2-tokens.json is checked in, so CI -- which has no M2 -- can re-run this
-// and verify the committed grammars really match their templates.
+// m2-tokens.json is checked in, so the tests can re-run this without starting
+// M2 and verify the committed grammars really match their templates.
 //
 // Run via "npm run update", or directly: node scripts/generate-syntax.js
 //

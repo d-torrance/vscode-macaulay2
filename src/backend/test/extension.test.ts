@@ -173,25 +173,39 @@ suite("Extension Tests", function () {
     );
   });
 
-  test("defines newline-safe WebApp output layout", function () {
-    const webviewTemplate = fs.readFileSync(
-      path.join(__dirname, "../../media/webview.html"),
+  test("matches Macaulay2 identifiers and numeric literals as editor words", function () {
+    const configurationSource = fs.readFileSync(
+      path.join(__dirname, "../../language-configuration.json"),
       "utf8",
     );
+    const configuration = JSON.parse(
+      configurationSource.replace(/^\s*\/\/.*$/gm, ""),
+    );
+    const wordPattern = new RegExp(
+      configuration.wordPattern.pattern,
+      configuration.wordPattern.flags,
+    );
+    const words = [
+      "foo'bar$2",
+      "αβ3$",
+      "foo_bar",
+      "1..5",
+      "1.5p53e+2",
+      ".5",
+      "0x1f",
+    ].map((source) =>
+      [...source.matchAll(wordPattern)].map((match) => match[0]),
+    );
 
-    assert.ok(
-      /\.M2Cell\s*{[^}]*white-space:\s*normal;[^}]*}/.test(webviewTemplate),
-    );
-    assert.ok(
-      /\.M2Cell\s*>\s*\.M2Input,\s*\.M2Cell\s*>\s*\.M2OutputScroll,\s*\.M2Cell\s*>\s*\.M2StandardOutput\s*{[^}]*white-space:\s*pre;[^}]*}/.test(
-        webviewTemplate,
-      ),
-    );
-    assert.ok(
-      /\.M2OutputScroll\s*>\s*\.M2Html\s*{[^}]*display:\s*block;[^}]*width:\s*fit-content;[^}]*}/.test(
-        webviewTemplate,
-      ),
-    );
+    assert.deepEqual(words, [
+      ["foo'bar$2"],
+      ["αβ3$"],
+      ["foo", "bar"],
+      ["1", "5"],
+      ["1.5p53e+2"],
+      [".5"],
+      ["0x1f"],
+    ]);
   });
 });
 

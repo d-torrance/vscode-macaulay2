@@ -65,27 +65,17 @@ There is no REPL target setting. To send evaluation to the terminal from a keybi
 
 ## Regenerating the grammars
 
-The syntax highlighting is generated from a running Macaulay2, so it stays in
-step with the interpreter rather than being maintained by hand. After
-installing a new Macaulay2, run:
+The syntax highlighting is generated from a running Macaulay2, so it stays in step with the interpreter rather than being maintained by hand. After installing a new Macaulay2, run:
 
 ```sh
 npm run update
 ```
 
-That runs `generate-grammar.m2`, which writes `syntaxes/m2-tokens.json` — the
-builtin symbols, the operator tables read out of the interpreter with
-`getParsing`, and the SimpleDoc section keywords — and then
-`scripts/generate-syntax.js`, which expands the `.in` templates.
+That runs `generate-grammar.m2`, which writes `syntaxes/m2-tokens.json` — the builtin symbols, the operator tables read out of the interpreter with `getParsing`, and the SimpleDoc section keywords — and then `scripts/generate-syntax.js`, which expands the `.in` templates.
 
-Edit the `.in` templates, never the generated `.json` files. CI checks that
-regenerating is a no-op, so a new operator or SimpleDoc keyword in Macaulay2
-shows up as a failing build.
+Edit the `.in` templates, never the generated `.json` files. CI checks that regenerating is a no-op, so a new operator or SimpleDoc keyword in Macaulay2 shows up as a failing build.
 
-The grammars follow the [Macaulay2 language
-grammar](https://github.com/Macaulay2/M2/wiki/Macaulay2-language-grammar) and
-[SimpleDoc language
-grammar](https://github.com/Macaulay2/M2/wiki/SimpleDoc-language-grammar).
+The grammars follow the [Macaulay2 language grammar](https://github.com/Macaulay2/M2/wiki/Macaulay2-language-grammar) and [SimpleDoc language grammar](https://github.com/Macaulay2/M2/wiki/SimpleDoc-language-grammar).
 
 ## Acknowledgements 
 
